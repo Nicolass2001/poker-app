@@ -9,7 +9,31 @@
   </head>
   <body>
     <h1>Welcome to the Poker App</h1>
-    <button hx-get="/action" hx-target="#response">Click here</button>
+    <input id="messageInput" type="text" placeholder="Type a message" />
+    <button onclick="sendMessage()">Send Message</button>
     <div id="response"></div>
+
+    <script>
+      const socket = new WebSocket("ws://localhost:8080/ws");
+
+      // Log connection events
+      socket.onopen = () => console.log("WebSocket connection established");
+      socket.onmessage = (event) => {
+        const responseDiv = document.getElementById("response");
+        responseDiv.innerHTML = `<p>${event.data}</p>`;
+      };
+      socket.onerror = (error) => console.error("WebSocket error:", error);
+      socket.onclose = () => console.log("WebSocket connection closed");
+
+      // Function to send a message to the server
+      function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const message = input.value;
+        if (message) {
+          socket.send(message);
+          input.value = ""; // Clear input
+        }
+      }
+    </script>
   </body>
 </html>
