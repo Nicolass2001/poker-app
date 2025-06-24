@@ -3,29 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Poker App</title>
+    <title>Poker Room</title>
     <link rel="stylesheet" href="/static/styles.css" />
     <script src="https://unpkg.com/htmx.org"></script>
   </head>
   <body>
-    <h1>Welcome to the Poker App</h1>
-    <input id="messageInput" type="text" placeholder="Type a message" />
-    <button onclick="sendMessage()">Send Message</button>
-    <div id="response"></div>
+    <h1>Welcome to the Poker Room</h1>
+    <div id="chat">
+      <div id="messages"></div>
+      <input id="messageInput" type="text" placeholder="Type a message" />
+      <button onclick="sendMessage()">Send</button>
+    </div>
 
     <script>
       const socket = new WebSocket("ws://localhost:8080/ws");
 
-      // Log connection events
-      socket.onopen = () => console.log("WebSocket connection established");
+      socket.onopen = () => console.log("Connected to the Poker Room");
       socket.onmessage = (event) => {
-        const responseDiv = document.getElementById("response");
-        responseDiv.innerHTML = `<p>${event.data}</p>`;
+        const messagesDiv = document.getElementById("messages");
+        const newMessage = document.createElement("div");
+        newMessage.textContent = event.data;
+        messagesDiv.appendChild(newMessage);
       };
       socket.onerror = (error) => console.error("WebSocket error:", error);
-      socket.onclose = () => console.log("WebSocket connection closed");
+      socket.onclose = () => console.log("Disconnected from the Poker Room");
 
-      // Function to send a message to the server
       function sendMessage() {
         const input = document.getElementById("messageInput");
         const message = input.value;
