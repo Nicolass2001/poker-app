@@ -55,4 +55,5 @@ func main() {
 	// Show initial game state
 	fmt.Println("Game started with the following players:")
 	showPlayers(game.GetPlayers())
+	showCommunityCards(game.GetCommunityCards())
 }

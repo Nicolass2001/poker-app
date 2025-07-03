@@ -67,3 +67,9 @@ func (d *Deck) dealCardsToPlayers(players Players) {
 
 	d.CardsByPlayers = cardsByPlayers
 }
+
+func (d *Deck) getComunityCardsCopy() []Card {
+	communityCardsCopy := make([]Card, len(d.CommunityCards))
+	copy(communityCardsCopy, d.CommunityCards)
+	return communityCardsCopy
+}

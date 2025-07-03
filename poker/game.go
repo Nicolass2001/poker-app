@@ -54,3 +54,8 @@ func (g *Game) StartGame() error {
 func (g *Game) GetPlayers() []*Player {
 	return g.Players.getPlayersSliceCopy()
 }
+
+// GetComunityCards returns the community cards
+func (g *Game) GetCommunityCards() []Card {
+	return g.Deck.getComunityCardsCopy()
+}
