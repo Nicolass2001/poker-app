@@ -2,7 +2,6 @@ package poker
 
 import "errors"
 
-// Player represents a player
 type player struct {
 	id    string
 	name  string
@@ -16,7 +15,6 @@ type players struct {
 	playersSlice []*player
 }
 
-// NewPlayer creates a new player with a given name and an initial stack
 func newPlayer(p *Player) *player {
 	return &player{
 		id:    p.Id,

@@ -4,7 +4,6 @@ import (
 	"math/rand"
 )
 
-// Card represents a card with value and suit
 type card struct {
 	value string
 	suit  string
@@ -49,7 +48,7 @@ func (d *deck) shuffle() {
 
 func (d *deck) draw() card {
 	card := d.cards[0]
-	d.cards = d.cards[1:] // Remove the drawn card from the deck
+	d.cards = d.cards[1:]
 	return card
 }
 
