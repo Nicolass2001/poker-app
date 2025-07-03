@@ -5,71 +5,80 @@ import (
 )
 
 // Card represents a card with value and suit
-type Card struct {
-	Value string
-	Suit  string
+type card struct {
+	value string
+	suit  string
 }
 
-type CardsByPlayer struct {
-	Player  *Player
-	CardOne Card
-	CardTwo Card
+type cardsByPlayer struct {
+	player  *player
+	cardOne card
+	cardTwo card
 }
 
-type Deck struct {
-	Cards          []Card
-	CommunityCards []Card
-	CardsByPlayers []CardsByPlayer
+type deck struct {
+	cards          []card
+	communityCards []card
+	cardsByPlayers []cardsByPlayer
 }
 
-func newDeck() *Deck {
+func newDeck() *deck {
 	suits := []string{"Hearts", "Diamonds", "Clubs", "Spades"}
 	values := []string{"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"}
 
-	cards := make([]Card, 0, len(suits)*len(values))
+	cards := make([]card, 0, len(suits)*len(values))
 	for _, suit := range suits {
 		for _, value := range values {
-			cards = append(cards, Card{Value: value, Suit: suit})
+			cards = append(cards, card{value: value, suit: suit})
 		}
 	}
 
-	communityCards := make([]Card, 5)
+	communityCards := make([]card, 5)
 
-	deck := &Deck{
-		Cards:          cards,
-		CommunityCards: communityCards,
+	deck := &deck{
+		cards:          cards,
+		communityCards: communityCards,
 	}
 	deck.shuffle()
 	return deck
 }
 
-func (d *Deck) shuffle() {
-	rand.Shuffle(len(d.Cards), func(i, j int) { d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i] })
+func (d *deck) shuffle() {
+	rand.Shuffle(len(d.cards), func(i, j int) { d.cards[i], d.cards[j] = d.cards[j], d.cards[i] })
 }
 
-func (d *Deck) draw() Card {
-	card := d.Cards[0]
-	d.Cards = d.Cards[1:] // Remove the drawn card from the deck
+func (d *deck) draw() card {
+	card := d.cards[0]
+	d.cards = d.cards[1:] // Remove the drawn card from the deck
 	return card
 }
 
-func (d *Deck) dealCardsToPlayers(players Players) {
+func (d *deck) dealCardsToPlayers(players players) {
 	playersSlice := players.playersSlice
-	cardsByPlayers := make([]CardsByPlayer, len(playersSlice))
+	cardsByPlayers := make([]cardsByPlayer, len(playersSlice))
 	for i, player := range playersSlice {
-		cardsByPlayers[i] = CardsByPlayer{
-			Player:  player,
-			CardOne: d.draw(),
-			CardTwo: d.draw(),
+		cardsByPlayers[i] = cardsByPlayer{
+			player:  player,
+			cardOne: d.draw(),
+			cardTwo: d.draw(),
 		}
-		player.Cards = &cardsByPlayers[i]
+		player.cards = &cardsByPlayers[i]
 	}
 
-	d.CardsByPlayers = cardsByPlayers
+	d.cardsByPlayers = cardsByPlayers
 }
 
-func (d *Deck) getComunityCardsCopy() []Card {
-	communityCardsCopy := make([]Card, len(d.CommunityCards))
-	copy(communityCardsCopy, d.CommunityCards)
+func (c *card) getCardCopy() Card {
+	return Card{
+		Value: c.value,
+		Suit:  c.suit,
+	}
+}
+
+func (d *deck) getComunityCardsCopy() []Card {
+	communityCardsCopy := make([]Card, len(d.communityCards))
+	for i, card := range d.communityCards {
+		communityCardsCopy[i] = card.getCardCopy()
+	}
 	return communityCardsCopy
 }

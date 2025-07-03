@@ -3,51 +3,65 @@ package poker
 import "errors"
 
 // Player represents a player
-type Player struct {
-	Id    string
-	Name  string
-	Stack int
-	Bet   *BetsByPlayer
-	Cards *CardsByPlayer
+type player struct {
+	id    string
+	name  string
+	stack int
+	bet   *betsByPlayer
+	cards *cardsByPlayer
 }
 
-type Players struct {
-	players      map[string]*Player
-	playersSlice []*Player
+type players struct {
+	players      map[string]*player
+	playersSlice []*player
 }
 
 // NewPlayer creates a new player with a given name and an initial stack
-func NewPlayer(id string, name string, initialStack int) *Player {
-	return &Player{
-		Id:    id,
-		Name:  name,
-		Stack: initialStack,
+func newPlayer(p *Player) *player {
+	return &player{
+		id:    p.Id,
+		name:  p.Name,
+		stack: p.Stack,
 	}
 }
 
-func newPlayers() Players {
-	return Players{
-		players:      make(map[string]*Player),
-		playersSlice: []*Player{},
+func newPlayers() players {
+	return players{
+		players:      make(map[string]*player),
+		playersSlice: []*player{},
 	}
 }
 
-func (p *Players) addPlayer(player *Player) error {
+func (p *players) addPlayer(player *Player) error {
 	if player == nil {
 		return errors.New("player cannot be nil")
 	}
 	if _, exists := p.players[player.Id]; exists {
 		return errors.New("player already exists")
 	}
-	p.players[player.Id] = player
-	p.playersSlice = append(p.playersSlice, player)
+	newPlayer := newPlayer(player)
+	p.players[player.Id] = newPlayer
+	p.playersSlice = append(p.playersSlice, newPlayer)
 	return nil
 }
 
-func (p *Players) getPlayersSliceCopy() []*Player {
-	players := make([]*Player, 0, len(p.players))
-	for _, player := range p.players {
-		players = append(players, player)
+func (p *player) getPlayerCopy() Player {
+	return Player{
+		Id:    p.id,
+		Name:  p.name,
+		Stack: p.stack,
+		Bet:   p.bet.bet,
+		Cards: [2]Card{
+			p.cards.cardOne.getCardCopy(),
+			p.cards.cardTwo.getCardCopy(),
+		},
 	}
-	return players
+}
+
+func (p *players) getPlayersSliceCopy() []Player {
+	playersCopy := make([]Player, 0, len(p.players))
+	for _, player := range p.players {
+		playersCopy = append(playersCopy, player.getPlayerCopy())
+	}
+	return playersCopy
 }

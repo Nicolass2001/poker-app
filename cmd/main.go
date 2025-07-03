@@ -7,13 +7,13 @@ import (
 )
 
 // ShowPlayers displays the players and their cards
-func showPlayers(players []*poker.Player) {
+func showPlayers(players []poker.Player) {
 	fmt.Printf("%-15s %-30s %-10s\n", "Player", "Cards", "Bet")
 	fmt.Println(strings.Repeat("-", 60))
 	for _, player := range players {
-		card1 := fmt.Sprintf("%s of %s", player.Cards.CardOne.Value, player.Cards.CardOne.Suit)
-		card2 := fmt.Sprintf("%s of %s", player.Cards.CardTwo.Value, player.Cards.CardTwo.Suit)
-		fmt.Printf("%-15s %-30s %-10d\n", player.Name, fmt.Sprintf("%s, %s", card1, card2), player.Bet.Bet)
+		card1 := player.Cards[0].String()
+		card2 := player.Cards[1].String()
+		fmt.Printf("%-15s %-30s %-10d\n", player.Name, fmt.Sprintf("%s, %s", card1, card2), player.Bet)
 	}
 	fmt.Println(strings.Repeat("-", 60))
 	fmt.Println()

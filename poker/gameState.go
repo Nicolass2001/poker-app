@@ -1,32 +1,32 @@
 package poker
 
-type GameState int
+type gameState int
 
 const (
-	StateWaitingForPlayers GameState = iota
-	StatePreFlop
-	StateFlop
-	StateTurn
-	StateRiver
-	StateShowdown
-	StateHandOver
+	stateWaitingForPlayers gameState = iota
+	statePreFlop
+	stateFlop
+	stateTurn
+	stateRiver
+	stateShowdown
+	stateHandOver
 )
 
-func (s GameState) String() string {
+func (s gameState) String() string {
 	switch s {
-	case StateWaitingForPlayers:
+	case stateWaitingForPlayers:
 		return "Waiting for Players"
-	case StatePreFlop:
+	case statePreFlop:
 		return "Pre-Flop"
-	case StateFlop:
+	case stateFlop:
 		return "Flop"
-	case StateTurn:
+	case stateTurn:
 		return "Turn"
-	case StateRiver:
+	case stateRiver:
 		return "River"
-	case StateShowdown:
+	case stateShowdown:
 		return "Showdown"
-	case StateHandOver:
+	case stateHandOver:
 		return "Hand Over"
 	default:
 		return "Unknown State"
