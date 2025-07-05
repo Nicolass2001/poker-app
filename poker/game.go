@@ -36,11 +36,9 @@ func (g *game) AddPlayer(player *Player) error {
 
 // StartGame initializes the game state, deals cards to players and sets the blinds
 func (g *game) StartGame() error {
-	// Check if the game is in the waiting state
 	if g.gameState != stateWaitingForPlayers {
 		return errors.New("game is already started or in progress")
 	}
-	// Check if there are enough players to start the game
 	if len(g.players.players) < 2 {
 		return errors.New("not enough players to start the game")
 	}

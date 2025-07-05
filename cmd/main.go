@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-// ShowPlayers displays the players and their cards
 func showPlayers(players []poker.Player) {
 	fmt.Printf("%-15s %-30s %-10s\n", "Player", "Cards", "Bet")
 	fmt.Println(strings.Repeat("-", 60))
