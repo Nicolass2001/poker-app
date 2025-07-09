@@ -65,23 +65,17 @@ func (g *game) MakeAction(action Action, amount int) error {
 		return errors.New("game is not in a valid state for actions")
 	}
 
-	println("Current game state:", g.gameState.String())
-
-	currentPlayer := g.bets.getBettingPlayer()
-
-	err := g.bets.playerAction(currentPlayer, action, amount)
+	err := g.bets.playerAction(action, amount)
 	if err != nil {
 		return err
 	}
 
 	if !g.bets.keepBetting() {
 		g.nextBettingGameState()
-		println("Next game state:", g.gameState.String())
 		return nil
 	}
 
-	nextPlayer := g.players.getNextBettingPlayer(currentPlayer)
-	g.bets.setBettingPlayer(nextPlayer)
+	g.bets.setNextBettingPlayer()
 
 	return nil
 }

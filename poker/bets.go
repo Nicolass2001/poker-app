@@ -50,16 +50,27 @@ func (b *bets) setBlinds() {
 	b.bigBlindPlayerBeted = false
 }
 
-func (b *bets) getBettingPlayer() *player {
-	return b.bettingPlayer
+func (b *bets) setNextBettingPlayer() {
+	b.bettingPlayer = b.getNextBettingPlayer(b.bettingPlayer)
 }
 
-func (b *bets) setBettingPlayer(player *player) {
-	b.bettingPlayer = player
+func (b *bets) getNextBettingPlayer(player *player) *player {
+	for i, bet := range b.betsByPlayers {
+		if bet.player.id == player.id {
+			nextIndex := (i + 1) % len(b.betsByPlayers)
+			nextBet := b.betsByPlayers[nextIndex]
+			if nextBet.isFolded {
+				return b.getNextBettingPlayer(nextBet.player)
+			}
+			return nextBet.player
+		}
+	}
+	return nil
 }
 
-func (b *bets) playerAction(player *player, action Action, amount int) error {
+func (b *bets) playerAction(action Action, amount int) error {
 	currentBet := b.highestBet
+	player := b.bettingPlayer
 
 	switch action {
 	case ActionCheck:

@@ -34,17 +34,3 @@ func (p *players) getPlayersSliceCopy() []Player {
 	}
 	return playersCopy
 }
-
-func (p *players) getNextBettingPlayer(currentPlayer *player) *player {
-	for i, player := range p.playersSlice {
-		if player.id == currentPlayer.id {
-			nextIndex := (i + 1) % len(p.playersSlice)
-			nextPlayer := p.playersSlice[nextIndex]
-			if nextPlayer.hasFolded() {
-				return p.getNextBettingPlayer(nextPlayer)
-			}
-			return nextPlayer
-		}
-	}
-	return nil
-}
