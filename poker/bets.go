@@ -69,46 +69,59 @@ func (b *bets) getNextBettingPlayer(player *player) *player {
 }
 
 func (b *bets) playerAction(action Action, amount int) error {
-	currentBet := b.highestBet
-	player := b.bettingPlayer
-
-	switch action {
-	case ActionCheck:
-		if player.bet.bet < currentBet {
-			return errors.New("cannot check when not matched")
-		}
-
-	case ActionCall:
-		diff := currentBet - player.bet.bet
-		if diff <= 0 {
-			return errors.New("nothing to call")
-		}
-		player.raiseBet(diff)
-
-	case ActionRaise:
-		if amount <= 0 {
-			return errors.New("invalid amount for action")
-		}
-		player.raiseBet(amount)
-
-	case ActionAllIn:
-		player.raiseBet(player.stack)
-
-	case ActionFold:
-		player.bet.isFolded = true
-
-	default:
-		return errors.New("invalid action")
+	amountToRaise, err := b.calculateAmountToRaise(action, amount)
+	if err != nil {
+		return err
 	}
 
-	if !player.hasFolded() && player.bet.bet > b.highestBet {
-		b.highestBet = player.bet.bet
-	}
+	bettingPlayer := b.bettingPlayer
+	bettingPlayer.raiseBet(amountToRaise)
 
-	if player.id == b.bigBlindPlayer.id {
+	b.highestBet = max(b.highestBet, bettingPlayer.bet.bet)
+
+	if bettingPlayer.id == b.bigBlindPlayer.id {
 		b.bigBlindPlayerBeted = true
 	}
 	return nil
+}
+
+func (b *bets) calculateAmountToRaise(action Action, amount int) (int, error) {
+	currentBet := b.highestBet
+	bettingPlayer := b.bettingPlayer
+	amountToRaise := amount
+
+	switch action {
+	case ActionCheck:
+		if bettingPlayer.bet.bet < currentBet {
+			return 0, errors.New("cannot check when not matched")
+		}
+		amountToRaise = 0
+
+	case ActionCall:
+		diff := currentBet - bettingPlayer.bet.bet
+		if diff <= 0 {
+			return 0, errors.New("nothing to call")
+		}
+		amountToRaise = diff
+
+	case ActionRaise:
+		if amount <= 0 {
+			return 0, errors.New("invalid amount for action")
+		}
+		amountToRaise = amount
+
+	case ActionAllIn:
+		amountToRaise = bettingPlayer.stack
+
+	case ActionFold:
+		bettingPlayer.bet.isFolded = true
+		amountToRaise = 0
+
+	default:
+		return 0, errors.New("invalid action")
+	}
+
+	return amountToRaise, nil
 }
 
 func (b *bets) keepBetting() bool {

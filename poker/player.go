@@ -32,17 +32,10 @@ func (p *player) getPlayerCopy() Player {
 }
 
 func (p *player) raiseBet(amount int) error {
-	if amount <= 0 {
-		return errors.New("raise amount must be greater than zero")
-	}
 	if p.stack < amount {
 		return errors.New("not enough stack to raise")
 	}
 	p.bet.bet += amount
 	p.stack -= amount
 	return nil
-}
-
-func (p *player) hasFolded() bool {
-	return p.bet.isFolded
 }

@@ -45,7 +45,7 @@ func (g *game) StartGame() error {
 	g.bets.initializeBets(g.players)
 	g.bets.setBlinds()
 	g.deck.dealCardsToPlayers(g.players)
-	g.gameState = statePreFlop
+	g.gameState = g.gameState.nextState()
 	return nil
 }
 
@@ -70,31 +70,26 @@ func (g *game) MakeAction(action Action, amount int) error {
 		return err
 	}
 
-	if !g.bets.keepBetting() {
-		g.nextBettingGameState()
+	if g.bets.keepBetting() {
+		g.bets.setNextBettingPlayer()
 		return nil
 	}
 
-	g.bets.setNextBettingPlayer()
-
+	g.nextBettingGameState()
 	return nil
 }
 
 func (g *game) nextBettingGameState() {
 	g.bets.newBettingRound()
+
 	switch g.gameState {
 	case statePreFlop:
-		g.gameState = stateFlop
 		g.deck.flop()
 	case stateFlop:
-		g.gameState = stateTurn
 		g.deck.turn()
 	case stateTurn:
-		g.gameState = stateRiver
 		g.deck.river()
-	case stateRiver:
-		g.gameState = stateShowdown
-	default:
-		g.gameState = stateWaitingForPlayers
 	}
+
+	g.gameState = g.gameState.nextState()
 }

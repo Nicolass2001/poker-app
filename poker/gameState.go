@@ -41,3 +41,22 @@ func (s gameState) bettingState() bool {
 		return false
 	}
 }
+
+func (s gameState) nextState() gameState {
+	switch s {
+	case stateWaitingForPlayers:
+		return statePreFlop
+	case statePreFlop:
+		return stateFlop
+	case stateFlop:
+		return stateTurn
+	case stateTurn:
+		return stateRiver
+	case stateRiver:
+		return stateShowdown
+	case stateShowdown:
+		return stateHandOver
+	default:
+		return stateWaitingForPlayers
+	}
+}
