@@ -6,13 +6,8 @@ type player struct {
 	id    string
 	name  string
 	stack int
-	bet   *betsByPlayer
+	bet   *betByPlayer
 	cards *cardsByPlayer
-}
-
-type players struct {
-	players      map[string]*player
-	playersSlice []*player
 }
 
 func newPlayer(p *Player) *player {
@@ -21,26 +16,6 @@ func newPlayer(p *Player) *player {
 		name:  p.Name,
 		stack: p.Stack,
 	}
-}
-
-func newPlayers() players {
-	return players{
-		players:      make(map[string]*player),
-		playersSlice: []*player{},
-	}
-}
-
-func (p *players) addPlayer(player *Player) error {
-	if player == nil {
-		return errors.New("player cannot be nil")
-	}
-	if _, exists := p.players[player.Id]; exists {
-		return errors.New("player already exists")
-	}
-	newPlayer := newPlayer(player)
-	p.players[player.Id] = newPlayer
-	p.playersSlice = append(p.playersSlice, newPlayer)
-	return nil
 }
 
 func (p *player) getPlayerCopy() Player {
@@ -56,10 +31,18 @@ func (p *player) getPlayerCopy() Player {
 	}
 }
 
-func (p *players) getPlayersSliceCopy() []Player {
-	playersCopy := make([]Player, 0, len(p.players))
-	for _, player := range p.players {
-		playersCopy = append(playersCopy, player.getPlayerCopy())
+func (p *player) raiseBet(amount int) error {
+	if amount <= 0 {
+		return errors.New("raise amount must be greater than zero")
 	}
-	return playersCopy
+	if p.stack < amount {
+		return errors.New("not enough stack to raise")
+	}
+	p.bet.bet += amount
+	p.stack -= amount
+	return nil
+}
+
+func (p *player) hasFolded() bool {
+	return p.bet.isFolded
 }

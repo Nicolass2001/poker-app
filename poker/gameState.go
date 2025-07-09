@@ -32,3 +32,12 @@ func (s gameState) String() string {
 		return "Unknown State"
 	}
 }
+
+func (s gameState) bettingState() bool {
+	switch s {
+	case statePreFlop, stateFlop, stateTurn, stateRiver:
+		return true
+	default:
+		return false
+	}
+}

@@ -4,11 +4,6 @@ import (
 	"math/rand"
 )
 
-type card struct {
-	value string
-	suit  string
-}
-
 type cardsByPlayer struct {
 	player  *player
 	cardOne card
@@ -32,7 +27,7 @@ func newDeck() *deck {
 		}
 	}
 
-	communityCards := make([]card, 5)
+	communityCards := make([]card, 0, 5)
 
 	deck := &deck{
 		cards:          cards,
@@ -67,17 +62,22 @@ func (d *deck) dealCardsToPlayers(players players) {
 	d.cardsByPlayers = cardsByPlayers
 }
 
-func (c *card) getCardCopy() Card {
-	return Card{
-		Value: c.value,
-		Suit:  c.suit,
-	}
-}
-
 func (d *deck) getComunityCardsCopy() []Card {
 	communityCardsCopy := make([]Card, len(d.communityCards))
 	for i, card := range d.communityCards {
 		communityCardsCopy[i] = card.getCardCopy()
 	}
 	return communityCardsCopy
+}
+
+func (d *deck) flop() {
+	d.communityCards = append(d.communityCards, d.draw(), d.draw(), d.draw())
+}
+
+func (d *deck) turn() {
+	d.communityCards = append(d.communityCards, d.draw())
+}
+
+func (d *deck) river() {
+	d.communityCards = append(d.communityCards, d.draw())
 }

@@ -30,7 +30,7 @@ func main() {
 	// Initialize a new game
 	playerIds := []string{"player1", "player2"}
 	playerNames := []string{"Player 1", "Player 2"}
-	initialStacks := []int{10000, 10000}
+	initialStacks := []int{10000, 20000}
 	smallBlindAmount := 100
 	bigBlindAmount := 200
 	game, err := poker.NewGame(smallBlindAmount, bigBlindAmount)
@@ -51,8 +51,61 @@ func main() {
 		fmt.Println("Error starting game:", err)
 		return
 	}
+
 	// Show initial game state
-	fmt.Println("Game started with the following players:")
+	fmt.Println(" - Game started with the following players:")
 	showPlayers(game.GetPlayers())
 	showCommunityCards(game.GetCommunityCards())
+
+	// Player actions
+	game.MakeAction(poker.ActionCall, 0)
+
+	println(" - After Player 2 calls the big blind:")
+	showPlayers(game.GetPlayers())
+	showCommunityCards(game.GetCommunityCards())
+
+	game.MakeAction(poker.ActionRaise, 500)
+
+	println(" - After Player 1 raises:")
+	showPlayers(game.GetPlayers())
+	showCommunityCards(game.GetCommunityCards())
+
+	game.MakeAction(poker.ActionCall, 0)
+
+	println(" - After Player 2 calls the raise:")
+	showPlayers(game.GetPlayers())
+	showCommunityCards(game.GetCommunityCards())
+
+	game.MakeAction(poker.ActionCheck, 0)
+
+	println(" - Should be in the Flop state now:")
+	println(" - After Player 2 checks:")
+	showPlayers(game.GetPlayers())
+	showCommunityCards(game.GetCommunityCards())
+
+	game.MakeAction(poker.ActionCheck, 0)
+
+	println(" - After Player 1 checks:")
+	showPlayers(game.GetPlayers())
+	showCommunityCards(game.GetCommunityCards())
+
+	game.MakeAction(poker.ActionCheck, 0)
+
+	println(" - Should be in the Turn state now:")
+	println(" - After Player 2 checks again:")
+	showPlayers(game.GetPlayers())
+	showCommunityCards(game.GetCommunityCards())
+
+	game.MakeAction(poker.ActionAllIn, 0)
+
+	println(" - After Player 1 goes all-in:")
+	showPlayers(game.GetPlayers())
+	showCommunityCards(game.GetCommunityCards())
+
+	game.MakeAction(poker.ActionCall, 0)
+
+	println(" - After Player 2 calls the all-in:")
+	showPlayers(game.GetPlayers())
+	showCommunityCards(game.GetCommunityCards())
+
 }

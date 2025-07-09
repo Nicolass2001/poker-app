@@ -58,3 +58,49 @@ func (g *game) GetPlayers() []Player {
 func (g *game) GetCommunityCards() []Card {
 	return g.deck.getComunityCardsCopy()
 }
+
+// MakeAction allows the current player to perform an action (check, call, raise, fold, allin) with a specified amount
+func (g *game) MakeAction(action Action, amount int) error {
+	if !g.gameState.bettingState() {
+		return errors.New("game is not in a valid state for actions")
+	}
+
+	println("Current game state:", g.gameState.String())
+
+	currentPlayer := g.bets.getBettingPlayer()
+
+	err := g.bets.playerAction(currentPlayer, action, amount)
+	if err != nil {
+		return err
+	}
+
+	if !g.bets.keepBetting() {
+		g.nextBettingGameState()
+		println("Next game state:", g.gameState.String())
+		return nil
+	}
+
+	nextPlayer := g.players.getNextBettingPlayer(currentPlayer)
+	g.bets.setBettingPlayer(nextPlayer)
+
+	return nil
+}
+
+func (g *game) nextBettingGameState() {
+	g.bets.newBettingRound()
+	switch g.gameState {
+	case statePreFlop:
+		g.gameState = stateFlop
+		g.deck.flop()
+	case stateFlop:
+		g.gameState = stateTurn
+		g.deck.turn()
+	case stateTurn:
+		g.gameState = stateRiver
+		g.deck.river()
+	case stateRiver:
+		g.gameState = stateShowdown
+	default:
+		g.gameState = stateWaitingForPlayers
+	}
+}
