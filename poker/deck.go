@@ -18,7 +18,7 @@ type deck struct {
 
 func newDeck() *deck {
 	suits := []string{"Hearts", "Diamonds", "Clubs", "Spades"}
-	values := []string{"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"}
+	values := []string{"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}
 
 	cards := make([]card, 0, len(suits)*len(values))
 	for _, suit := range suits {

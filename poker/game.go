@@ -92,4 +92,13 @@ func (g *game) nextBettingGameState() {
 	}
 
 	g.gameState = g.gameState.nextState()
+
+	if g.gameState == stateShowdown {
+		g.showdownLogic()
+	}
+}
+
+func (g *game) showdownLogic() {
+	// winners := g.deck.calculateWinners()
+	// g.bets.distributeWinnings(winners)
 }
