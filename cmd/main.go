@@ -22,12 +22,12 @@ func cardsToString(card poker.Card) string {
 }
 
 func showPlayers(players []poker.Player) {
-	fmt.Printf("%-15s %-30s %-10s\n", "Player", "Cards", "Bet")
+	fmt.Printf("%-15s %-30s %-10s %-10s\n", "Player", "Cards", "Stack", "Bet")
 	fmt.Println(strings.Repeat("-", 60))
 	for _, player := range players {
 		card1 := cardsToString(player.Cards[0])
 		card2 := cardsToString(player.Cards[1])
-		fmt.Printf("%-15s %-30s %-10d\n", player.Name, fmt.Sprintf("%s, %s", card1, card2), player.Bet)
+		fmt.Printf("%-15s %-30s %-10d %-10d\n", player.Name, fmt.Sprintf("%s, %s", card1, card2), player.Stack, player.Bet)
 	}
 	fmt.Println(strings.Repeat("-", 60))
 }
