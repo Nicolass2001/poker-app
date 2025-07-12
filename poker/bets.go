@@ -140,3 +140,15 @@ func (b *bets) newBettingRound() {
 	b.bigBlindPlayerBeted = false
 	b.bettingPlayer = b.smallBlindPlayer
 }
+
+func (b *bets) distributeWinnings(winners []*player) {
+	totalPot := 0
+	for _, bet := range b.betsByPlayers {
+		totalPot += bet.bet
+	}
+
+	winningsPerWinner := totalPot / len(winners)
+	for _, winner := range winners {
+		winner.stack += winningsPerWinner
+	}
+}

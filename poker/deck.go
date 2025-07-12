@@ -5,9 +5,10 @@ import (
 )
 
 type cardsByPlayer struct {
-	player  *player
-	cardOne card
-	cardTwo card
+	player   *player
+	cardOne  card
+	cardTwo  card
+	bestHand *hand
 }
 
 type deck struct {
@@ -80,4 +81,67 @@ func (d *deck) turn() {
 
 func (d *deck) river() {
 	d.communityCards = append(d.communityCards, d.draw())
+}
+
+func (d *deck) calculateWinners() []*player {
+	winners := make([]*player, 0)
+	for i := range d.cardsByPlayers {
+		posibleCards := append(d.communityCards, d.cardsByPlayers[i].cardOne, d.cardsByPlayers[i].cardTwo)
+		d.cardsByPlayers[i].bestHand = evaluateBestHand(posibleCards)
+		winners = updateWinners(winners, d.cardsByPlayers[i].player)
+	}
+	return winners
+}
+
+func updateWinners(winners []*player, playerToCompare *player) []*player {
+	if len(winners) == 0 {
+		return append(winners, playerToCompare)
+	}
+
+	bestHandByNow := winners[0].cards.bestHand
+	playerHand := playerToCompare.cards.bestHand
+	handsComparison := playerHand.compareHands(bestHandByNow)
+
+	if handsComparison == 1 {
+		return []*player{playerToCompare}
+	}
+	if handsComparison == 0 {
+		winners = append(winners, playerToCompare)
+	}
+	return winners
+}
+
+func evaluateBestHand(cards []card) *hand {
+	combinations := combinationsOf5(cards)
+	bestHand := newHandWithCards(combinations[0])
+	for _, combination := range combinations {
+		hand := newHandWithCards(combination)
+		if hand.compareHands(bestHand) == 1 {
+			bestHand = hand
+		}
+	}
+	return bestHand
+}
+
+func combinationsOf5(input []card) [][]card {
+	var result [][]card
+	var comb []card = make([]card, 5)
+
+	var combine func(start, depth int)
+	combine = func(start, depth int) {
+		if depth == 5 {
+			// make a copy of comb and add to result
+			tmp := make([]card, 5)
+			copy(tmp, comb)
+			result = append(result, tmp)
+			return
+		}
+		for i := start; i < len(input); i++ {
+			comb[depth] = input[i]
+			combine(i+1, depth+1)
+		}
+	}
+
+	combine(0, 0)
+	return result
 }

@@ -99,6 +99,10 @@ func (g *game) nextBettingGameState() {
 }
 
 func (g *game) showdownLogic() {
-	// winners := g.deck.calculateWinners()
-	// g.bets.distributeWinnings(winners)
+	winners := g.deck.calculateWinners()
+	println("Winners of the showdown:")
+	for _, winner := range winners {
+		println(" -", winner.name, "with hand:", winner.cards.bestHand.string())
+	}
+	g.bets.distributeWinnings(winners)
 }
