@@ -100,6 +100,8 @@ func updateWinners(winners []*player, playerToCompare *player) []*player {
 
 	bestHandByNow := winners[0].cards.bestHand
 	playerHand := playerToCompare.cards.bestHand
+	println("Comparing with player:", playerToCompare.name, "with hand:", playerToCompare.cards.bestHand.string())
+	println("Comparing with player:", winners[0].name, "with hand:", winners[0].cards.bestHand.string())
 	handsComparison := playerHand.compareHands(bestHandByNow)
 
 	if handsComparison == 1 {

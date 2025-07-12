@@ -49,3 +49,34 @@ func compareLetters(a, b string) int {
 	}
 	return -1
 }
+
+func (c *card) nextValue() string {
+	switch c.value {
+	case "2":
+		return "3"
+	case "3":
+		return "4"
+	case "4":
+		return "5"
+	case "5":
+		return "6"
+	case "6":
+		return "7"
+	case "7":
+		return "8"
+	case "8":
+		return "9"
+	case "9":
+		return "10"
+	case "10":
+		return "J"
+	case "J":
+		return "Q"
+	case "Q":
+		return "K"
+	case "K":
+		return "A"
+	default:
+		return ""
+	}
+}
