@@ -1,90 +1,139 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
+	"log"
+	"math/rand"
 	"net/http"
 	"sync"
 
 	"github.com/gorilla/websocket"
 )
 
-// WebSocket Upgrader
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true }, // Allow connections from any origin
-}
+var (
+	tmpl = template.Must(template.ParseGlob("templates/*.html"))
 
-// Room struct to manage users and messages
+	roomsMu sync.Mutex
+	rooms   = map[string]*Room{}
+)
+
 type Room struct {
-	clients map[*websocket.Conn]bool // Active connections
-	mu      sync.Mutex               // Mutex to handle concurrent access
-	broadcast chan []byte            // Channel for broadcasting messages
+	Code        string
+	Password    string
+	Connections map[*websocket.Conn]bool
+	Mu          sync.Mutex
 }
 
-func newRoom() *Room {
-	return &Room{
-		clients:   make(map[*websocket.Conn]bool),
-		broadcast: make(chan []byte),
+var upgrader = websocket.Upgrader{}
+
+func main() {
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/create", createHandler)
+	http.HandleFunc("/join", joinHandler)
+	http.HandleFunc("/room/", roomHandler)
+	http.HandleFunc("/ws/", wsHandler)
+
+	log.Println("Server running at http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl.ExecuteTemplate(w, "index.html", nil)
+}
+
+func createHandler(w http.ResponseWriter, r *http.Request) {
+	code := generateCode()
+	pass := r.FormValue("password")
+
+	roomsMu.Lock()
+	rooms[code] = &Room{
+		Code:        code,
+		Password:    pass,
+		Connections: make(map[*websocket.Conn]bool),
 	}
+	roomsMu.Unlock()
+
+	http.Redirect(w, r, "/room/"+code, http.StatusSeeOther)
 }
 
-func (room *Room) run() {
+func joinHandler(w http.ResponseWriter, r *http.Request) {
+	code := r.FormValue("code")
+	pass := r.FormValue("password")
+
+	roomsMu.Lock()
+	room, ok := rooms[code]
+	roomsMu.Unlock()
+
+	if !ok || room.Password != pass {
+		http.Error(w, "Invalid code or password", http.StatusForbidden)
+		return
+	}
+
+	http.Redirect(w, r, "/room/"+code, http.StatusSeeOther)
+}
+
+func roomHandler(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Path[len("/room/"):]
+	roomsMu.Lock()
+	room, ok := rooms[code]
+	roomsMu.Unlock()
+	if !ok {
+		http.Error(w, "Room not found", http.StatusNotFound)
+		return
+	}
+
+	tmpl.ExecuteTemplate(w, "room.html", room)
+}
+
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Path[len("/ws/"):]
+	roomsMu.Lock()
+	room, ok := rooms[code]
+	roomsMu.Unlock()
+	if !ok {
+		http.Error(w, "Room not found", http.StatusNotFound)
+		return
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("upgrade:", err)
+		return
+	}
+
+	room.Mu.Lock()
+	room.Connections[conn] = true
+	room.Mu.Unlock()
+
 	for {
-		// Broadcast messages to all clients
-		message := <-room.broadcast
-		room.mu.Lock()
-		for client := range room.clients {
-			err := client.WriteMessage(websocket.TextMessage, message)
-			if err != nil {
-				fmt.Println("Error writing to client:", err)
-				client.Close()
-				delete(room.clients, client)
-			}
+		_, msg, err := conn.ReadMessage()
+		if err != nil {
+			break
 		}
-		room.mu.Unlock()
+
+		room.broadcast(msg)
 	}
-}
 
-func (room *Room) addClient(conn *websocket.Conn) {
-	room.mu.Lock()
-	room.clients[conn] = true
-	room.mu.Unlock()
-}
-
-func (room *Room) removeClient(conn *websocket.Conn) {
-	room.mu.Lock()
-	delete(room.clients, conn)
-	room.mu.Unlock()
+	room.Mu.Lock()
+	delete(room.Connections, conn)
+	room.Mu.Unlock()
 	conn.Close()
 }
 
-func main() {
-	room := newRoom()
-	go room.run() // Start the room's broadcast loop
+func (r *Room) broadcast(msg []byte) {
+	r.Mu.Lock()
+	defer r.Mu.Unlock()
+	for c := range r.Connections {
+		c.WriteMessage(websocket.TextMessage, msg)
+	}
+}
 
-	// Routes
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "templates/index.html")
-	})
-
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			fmt.Println("Error upgrading connection:", err)
-			return
-		}
-		room.addClient(conn)
-		defer room.removeClient(conn)
-
-		for {
-			_, message, err := conn.ReadMessage()
-			if err != nil {
-				fmt.Println("Error reading message:", err)
-				break
-			}
-			room.broadcast <- message // Send the message to all clients
-		}
-	})
-
-	fmt.Println("Server running at http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+func generateCode() string {
+	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	code := make([]byte, 4)
+	for i := range code {
+		code[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(code)
 }
