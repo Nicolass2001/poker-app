@@ -5,7 +5,7 @@ import (
 )
 
 // Game represents the state of the game
-type game struct {
+type Game struct {
 	deck      *deck
 	players   players
 	bets      *bets
@@ -13,12 +13,12 @@ type game struct {
 }
 
 // NewGame creates a new game instance with the specified small and big blind amounts
-func NewGame(smallBlindAmount int, bigBlindAmount int) (*game, error) {
+func NewGame(smallBlindAmount int, bigBlindAmount int) (*Game, error) {
 	bets := newBets(smallBlindAmount, bigBlindAmount)
 	deck := newDeck()
 	players := newPlayers()
 
-	return &game{
+	return &Game{
 		deck:      deck,
 		bets:      bets,
 		players:   players,
@@ -27,7 +27,7 @@ func NewGame(smallBlindAmount int, bigBlindAmount int) (*game, error) {
 }
 
 // AddPlayer adds a player to the game
-func (g *game) AddPlayer(player *Player) error {
+func (g *Game) AddPlayer(player *Player) error {
 	if g.gameState != stateWaitingForPlayers {
 		return errors.New("game has already started, cannot add players")
 	}
@@ -35,7 +35,7 @@ func (g *game) AddPlayer(player *Player) error {
 }
 
 // StartGame initializes the game state, deals cards to players and sets the blinds
-func (g *game) StartGame() error {
+func (g *Game) StartGame() error {
 	if g.gameState != stateWaitingForPlayers {
 		return errors.New("game is already started or in progress")
 	}
@@ -50,17 +50,17 @@ func (g *game) StartGame() error {
 }
 
 // GetPlayers returns a slice of all players in the game
-func (g *game) GetPlayers() []Player {
+func (g *Game) GetPlayers() []Player {
 	return g.players.getPlayersSliceCopy()
 }
 
 // GetComunityCards returns the community cards
-func (g *game) GetCommunityCards() []Card {
+func (g *Game) GetCommunityCards() []Card {
 	return g.deck.getComunityCardsCopy()
 }
 
 // MakeAction allows the current player to perform an action (check, call, raise, fold, allin) with a specified amount
-func (g *game) MakeAction(action Action, amount int) error {
+func (g *Game) MakeAction(action Action, amount int) error {
 	if !g.gameState.bettingState() {
 		return errors.New("game is not in a valid state for actions")
 	}
@@ -79,7 +79,7 @@ func (g *game) MakeAction(action Action, amount int) error {
 	return nil
 }
 
-func (g *game) nextBettingGameState() {
+func (g *Game) nextBettingGameState() {
 	g.bets.newBettingRound()
 
 	switch g.gameState {
@@ -98,7 +98,7 @@ func (g *game) nextBettingGameState() {
 	}
 }
 
-func (g *game) showdownLogic() {
+func (g *Game) showdownLogic() {
 	winners := g.deck.calculateWinners()
 	println("Winners of the showdown:")
 	for _, winner := range winners {
