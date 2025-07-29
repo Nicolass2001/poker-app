@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -20,7 +21,7 @@ var (
 type Room struct {
 	Code        string
 	Password    string
-	Connections map[*websocket.Conn]bool
+	Connections map[string]*websocket.Conn
 	Mu          sync.Mutex
 }
 
@@ -44,21 +45,23 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	code := generateCode()
+	nickname := r.FormValue("nickname")
 	pass := r.FormValue("password")
 
 	roomsMu.Lock()
 	rooms[code] = &Room{
 		Code:        code,
 		Password:    pass,
-		Connections: make(map[*websocket.Conn]bool),
+		Connections: make(map[string]*websocket.Conn),
 	}
 	roomsMu.Unlock()
 
-	http.Redirect(w, r, "/room/"+code, http.StatusSeeOther)
+	http.Redirect(w, r, "/room/"+code+"?nickname="+nickname, http.StatusSeeOther)
 }
 
 func joinHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
+	nickname := r.FormValue("nickname")
 	pass := r.FormValue("password")
 
 	roomsMu.Lock()
@@ -70,11 +73,20 @@ func joinHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/room/"+code, http.StatusSeeOther)
+	room.Mu.Lock()
+	_, exists := room.Connections[nickname]
+	room.Mu.Unlock()
+	if exists {
+		http.Error(w, "Nickname already taken", http.StatusConflict)
+		return
+	}
+
+	http.Redirect(w, r, "/room/"+code+"?nickname="+nickname, http.StatusSeeOther)
 }
 
 func roomHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Path[len("/room/"):]
+	nickname := r.URL.Query().Get("nickname")
 	roomsMu.Lock()
 	room, ok := rooms[code]
 	roomsMu.Unlock()
@@ -83,11 +95,18 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl.ExecuteTemplate(w, "room.html", room)
+	tmpl.ExecuteTemplate(w, "room.html", struct {
+		Code     string
+		Nickname string
+	}{
+		Code:     room.Code,
+		Nickname: nickname,
+	})
 }
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Path[len("/ws/"):]
+	nickname := r.URL.Query().Get("nickname")
 	roomsMu.Lock()
 	room, ok := rooms[code]
 	roomsMu.Unlock()
@@ -103,8 +122,15 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	room.Mu.Lock()
-	room.Connections[conn] = true
+	room.Connections[nickname] = conn
+	var playersNames []string
+	for p := range room.Connections {
+		playersNames = append(playersNames, p)
+	}
 	room.Mu.Unlock()
+
+	room.broadcast([]byte(nickname + " has joined the room."))
+	room.broadcast([]byte("Current players: " + strings.Join(playersNames, ", ")))
 
 	for {
 		_, msg, err := conn.ReadMessage()
@@ -116,7 +142,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	room.Mu.Lock()
-	delete(room.Connections, conn)
+	delete(room.Connections, nickname)
 	room.Mu.Unlock()
 	conn.Close()
 }
@@ -124,7 +150,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 func (r *Room) broadcast(msg []byte) {
 	r.Mu.Lock()
 	defer r.Mu.Unlock()
-	for c := range r.Connections {
+	for _, c := range r.Connections {
 		c.WriteMessage(websocket.TextMessage, msg)
 	}
 }

@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <title>Chat Rooms</title>
     <link rel="stylesheet" href="/static/styles.css" />
-    <script src="/static/htmx.min.js"></script>
   </head>
   <body>
     <div class="container">
@@ -14,6 +13,9 @@
       <form action="/create" method="POST">
         <label>Room Password</label>
         <input type="password" name="password" required />
+
+        <label>Nickname</label>
+        <input type="text" name="nickname" required />
 
         <button type="submit">Create</button>
       </form>
@@ -27,6 +29,9 @@
 
         <label>Room Password</label>
         <input type="password" name="password" required />
+
+        <label>Nickname</label>
+        <input type="text" name="nickname" required />
 
         <button type="submit">Join</button>
       </form>

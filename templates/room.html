@@ -22,13 +22,20 @@
     </div>
 
     <script>
-      const ws = new WebSocket("ws://" + location.host + "/ws/{{.Code}}");
+      const nickname = "{{.Nickname}}";
+      const ws = new WebSocket(
+        "ws://" +
+          location.host +
+          "/ws/{{.Code}}?nickname=" +
+          encodeURIComponent(nickname)
+      );
       const chat = document.getElementById("chat");
       const form = document.getElementById("msgForm");
       const input = document.getElementById("msgInput");
 
       ws.onmessage = (e) => {
         const msg = document.createElement("div");
+        console.log(e.data);
         msg.textContent = e.data;
         chat.appendChild(msg);
         chat.scrollTop = chat.scrollHeight;
