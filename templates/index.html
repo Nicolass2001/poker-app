@@ -2,65 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Chat — Home</title>
+    <title>Chat Rooms</title>
+    <link rel="stylesheet" href="/static/styles.css" />
     <script src="/static/htmx.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="bg-gray-100 text-gray-900">
-    <div class="container mx-auto p-8">
-      <h1 class="text-3xl font-bold mb-6 text-center">Welcome</h1>
+  <body>
+    <div class="container">
+      <h1>Welcome</h1>
 
-      <div class="max-w-md mx-auto bg-white shadow rounded p-6 space-y-6">
-        <h2 class="text-xl font-semibold">Create Room</h2>
-        <form action="/create" method="POST" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium">Password</label>
-            <input
-              type="password"
-              name="password"
-              class="w-full border rounded px-3 py-2"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-          >
-            Create
-          </button>
-        </form>
+      <h2>Create Room</h2>
+      <form action="/create" method="POST">
+        <label>Room Password</label>
+        <input type="password" name="password" required />
 
-        <hr />
+        <button type="submit">Create</button>
+      </form>
 
-        <h2 class="text-xl font-semibold">Join Room</h2>
-        <form action="/join" method="POST" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium">Code</label>
-            <input
-              type="text"
-              name="code"
-              maxlength="4"
-              class="w-full border rounded px-3 py-2"
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium">Password</label>
-            <input
-              type="password"
-              name="password"
-              class="w-full border rounded px-3 py-2"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-          >
-            Join
-          </button>
-        </form>
-      </div>
+      <hr />
+
+      <h2>Join Room</h2>
+      <form action="/join" method="POST">
+        <label>Room Code</label>
+        <input type="text" name="code" maxlength="4" required />
+
+        <label>Room Password</label>
+        <input type="password" name="password" required />
+
+        <button type="submit">Join</button>
+      </form>
     </div>
   </body>
 </html>
