@@ -20,7 +20,6 @@ var (
 
 type Room struct {
 	Code        string
-	Password    string
 	Connections map[string]*websocket.Conn
 	Mu          sync.Mutex
 }
@@ -46,12 +45,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	code := generateCode()
 	nickname := r.FormValue("nickname")
-	pass := r.FormValue("password")
 
 	roomsMu.Lock()
 	rooms[code] = &Room{
 		Code:        code,
-		Password:    pass,
 		Connections: make(map[string]*websocket.Conn),
 	}
 	roomsMu.Unlock()
@@ -62,14 +59,13 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 func joinHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
 	nickname := r.FormValue("nickname")
-	pass := r.FormValue("password")
 
 	roomsMu.Lock()
 	room, ok := rooms[code]
 	roomsMu.Unlock()
 
-	if !ok || room.Password != pass {
-		http.Error(w, "Invalid code or password", http.StatusForbidden)
+	if !ok {
+		http.Error(w, "Invalid code", http.StatusForbidden)
 		return
 	}
 
