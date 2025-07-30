@@ -5,10 +5,13 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
+
+	"poker-app/poker"
 )
 
 var (
@@ -20,6 +23,7 @@ var (
 
 type Room struct {
 	Code        string
+	Game        *poker.Game
 	Connections map[string]*websocket.Conn
 	Mu          sync.Mutex
 }
@@ -45,10 +49,27 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	code := generateCode()
 	nickname := r.FormValue("nickname")
+	smallBlind, err := strconv.Atoi(r.FormValue("small_blind"))
+	if err != nil {
+		http.Error(w, "Invalid small blind", http.StatusBadRequest)
+		return
+	}
+	bigBlind, err := strconv.Atoi(r.FormValue("big_blind"))
+	if err != nil {
+		http.Error(w, "Invalid big blind", http.StatusBadRequest)
+		return
+	}
+
+	game, err := poker.NewGame(smallBlind, bigBlind)
+	if err != nil {
+		http.Error(w, "Failed to create game", http.StatusInternalServerError)
+		return
+	}
 
 	roomsMu.Lock()
 	rooms[code] = &Room{
 		Code:        code,
+		Game:        game,
 		Connections: make(map[string]*websocket.Conn),
 	}
 	roomsMu.Unlock()
