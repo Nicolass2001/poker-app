@@ -22,10 +22,11 @@ var (
 )
 
 type Room struct {
-	Code        string
-	Game        *poker.Game
-	Connections map[string]*websocket.Conn
-	Mu          sync.Mutex
+	Code          string
+	Game          *poker.Game
+	StartingChips int
+	Connections   map[string]*websocket.Conn
+	Mu            sync.Mutex
 }
 
 var upgrader = websocket.Upgrader{}
@@ -59,6 +60,11 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid big blind", http.StatusBadRequest)
 		return
 	}
+	startingChips, err := strconv.Atoi(r.FormValue("starting_chips"))
+	if err != nil {
+		http.Error(w, "Invalid starting chips", http.StatusBadRequest)
+		return
+	}
 
 	game, err := poker.NewGame(smallBlind, bigBlind)
 	if err != nil {
@@ -68,9 +74,10 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 	roomsMu.Lock()
 	rooms[code] = &Room{
-		Code:        code,
-		Game:        game,
-		Connections: make(map[string]*websocket.Conn),
+		Code:          code,
+		Game:          game,
+		StartingChips: startingChips,
+		Connections:   make(map[string]*websocket.Conn),
 	}
 	roomsMu.Unlock()
 

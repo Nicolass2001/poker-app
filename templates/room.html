@@ -2,26 +2,53 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Room {{.Code}}</title>
-    <link rel="stylesheet" href="/static/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Póker Room</title>
+    <link rel="stylesheet" href="/static/test.css" />
   </head>
   <body>
-    <div class="container">
-      <h2>Room: {{.Code}}</h2>
-      <div id="chat"></div>
+    <div class="table">
+      <div class="pot">Pot: $1200</div>
 
-      <form id="msgForm">
-        <input
-          type="text"
-          id="msgInput"
-          placeholder="Type a message…"
-          autofocus
-        />
-        <button type="submit">Send</button>
-      </form>
+      <div class="community-cards">
+        <div class="card">J♠</div>
+        <div class="card">J♠</div>
+        <div class="card">J♠</div>
+        <div class="card">J♠</div>
+        <div class="card">J♠</div>
+      </div>
+
+      <div id="player1" class="player player-top">Player 1</div>
+      <div id="player2" class="player player-right-top">Player 2</div>
+      <div id="player3" class="player player-right-bottom">Player 3</div>
+      <div id="player4" class="player player-bottom">Player 4</div>
+      <div id="player5" class="player player-left-bottom">Player 5</div>
+      <div id="player6" class="player player-left-top">Player 6</div>
+    </div>
+    <div class="controls">
+      <button id="call-button" class="action-button">Call</button>
+      <button id="check-button" class="action-button">Check</button>
+      <button id="fold-button" class="action-button">Fold</button>
+      <input type="number" id="bet-amount" placeholder="Raise Amount" />
+      <button id="raise-button" class="action-button">Raise</button>
+    </div>
+    <div class="player-info">
+      <div class="player-name">Player 1</div>
+      <div class="player-chips">Chips: $1500</div>
+      <div class="player-bet">Bet: $200</div>
+      <div class="player-cards">
+        <div class="card">J♠</div>
+        <div class="card">J♠</div>
+      </div>
     </div>
 
     <script>
+      const suits = {
+        Spades: "♠",
+        Hearts: "♥",
+        Diamonds: "♦",
+        Clubs: "♣",
+      };
       const nickname = "{{.Nickname}}";
       const ws = new WebSocket(
         "ws://" +
@@ -29,25 +56,42 @@
           "/ws/{{.Code}}?nickname=" +
           encodeURIComponent(nickname)
       );
-      const chat = document.getElementById("chat");
-      const form = document.getElementById("msgForm");
-      const input = document.getElementById("msgInput");
+      const callButton = document.getElementById("call-button");
+      const checkButton = document.getElementById("check-button");
+      const foldButton = document.getElementById("fold-button");
+      const raiseButton = document.getElementById("raise-button");
+      const betAmount = document.getElementById("bet-amount");
 
       ws.onmessage = (e) => {
         const msg = document.createElement("div");
         console.log(e.data);
-        msg.textContent = e.data;
-        chat.appendChild(msg);
-        chat.scrollTop = chat.scrollHeight;
       };
 
-      form.onsubmit = (e) => {
-        e.preventDefault();
-        if (input.value.trim() !== "") {
-          ws.send(input.value);
-          input.value = "";
+      callButton.onclick = () => {
+        sendAction("call");
+      };
+
+      checkButton.onclick = () => {
+        sendAction("check");
+      };
+
+      foldButton.onclick = () => {
+        sendAction("fold");
+      };
+
+      raiseButton.onclick = () => {
+        const amount = betAmount.value;
+        if (amount) {
+          sendAction("raise");
+        } else {
+          alert("Please enter a raise amount.");
         }
       };
+
+      function sendAction(action) {
+        ws.send(JSON.stringify({ action: action, amount: betAmount.value }));
+        betAmount.value = "";
+      }
     </script>
   </body>
 </html>
