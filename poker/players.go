@@ -27,6 +27,13 @@ func (p *players) addPlayer(player *Player) error {
 	return nil
 }
 
+func (p *players) getPlayerById(id string) (Player, error) {
+	if player, exists := p.players[id]; exists {
+		return player.getPlayerCopy(), nil
+	}
+	return Player{}, errors.New("player not found")
+}
+
 func (p *players) getPlayersSliceCopy() []Player {
 	playersCopy := make([]Player, 0, len(p.players))
 	for _, player := range p.playersSlice {

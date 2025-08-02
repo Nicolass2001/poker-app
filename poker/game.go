@@ -49,6 +49,11 @@ func (g *Game) StartGame() error {
 	return nil
 }
 
+// GetPlayerById returns the player with the specified ID
+func (g *Game) GetPlayerById(id string) (Player, error) {
+	return g.players.getPlayerById(id)
+}
+
 // GetPlayers returns a slice of all players in the game
 func (g *Game) GetPlayers() []Player {
 	return g.players.getPlayersSliceCopy()

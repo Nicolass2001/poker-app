@@ -19,6 +19,14 @@ func newPlayer(p *Player) *player {
 }
 
 func (p *player) getPlayerCopy() Player {
+	if p.bet == nil || p.cards == nil {
+		return Player{
+			Id:    p.id,
+			Name:  p.name,
+			Stack: p.stack,
+			Bet:   0,
+		}
+	}
 	return Player{
 		Id:    p.id,
 		Name:  p.name,
