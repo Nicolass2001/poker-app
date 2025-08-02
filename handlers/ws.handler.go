@@ -29,14 +29,10 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 	room.Mu.Lock()
 	room.Connections[nickname] = conn
-	var playersNames []string
-	for p := range room.Connections {
-		playersNames = append(playersNames, p)
-	}
+	room.PlayersNames = append(room.PlayersNames, nickname)
 	room.Mu.Unlock()
 
-	room.broadcast([]byte(nickname + " has joined the room."))
-	room.broadcast([]byte("Current players: " + strings.Join(playersNames, ", ")))
+	room.broadcastGameState()
 
 	for {
 		_, msg, err := conn.ReadMessage()
@@ -59,4 +55,13 @@ func (r *Room) broadcast(msg []byte) {
 	for _, c := range r.Connections {
 		c.WriteMessage(websocket.TextMessage, msg)
 	}
+}
+
+func (r *Room) broadcastGameState() {
+	r.Mu.Lock()
+	playersNames := make([]string, len(r.PlayersNames))
+	copy(playersNames, r.PlayersNames)
+	r.Mu.Unlock()
+
+	r.broadcast([]byte("Current players: " + strings.Join(playersNames, ", ")))
 }
