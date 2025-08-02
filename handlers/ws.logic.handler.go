@@ -3,11 +3,16 @@ package handlers
 import (
 	"encoding/json"
 	"log"
+	"poker-app/poker"
 )
 
 type message struct {
 	Type string `json:"type"`
 	Data any    `json:"data"`
+}
+
+type gameStateData struct {
+	Players []poker.PlayerInfo `json:"players"`
 }
 
 func (r *Room) broadcastGameState() {
@@ -17,7 +22,9 @@ func (r *Room) broadcastGameState() {
 
 	r.broadcast(message{
 		Type: "gameState",
-		Data: players,
+		Data: gameStateData{
+			Players: players,
+		},
 	})
 }
 

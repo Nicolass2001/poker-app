@@ -67,15 +67,15 @@
 
       ws.onmessage = (e) => {
         console.log(e.data);
-        const data = JSON.parse(e.data);
-        handleIncomingMessage(data);
+        const msg = JSON.parse(e.data);
+        handleIncomingMessage(msg);
       };
 
-      function handleIncomingMessage(data) {
-        if (data.type === "gameState") {
-          loadPlayers(data.data);
+      function handleIncomingMessage(msg) {
+        if (msg.type === "gameState") {
+          loadPlayers(msg.data.players);
         } else {
-          console.log("Unknown message type:", data.type);
+          console.log("Unknown message type:", msg.type);
         }
       }
 
@@ -123,8 +123,10 @@
       function sendAction(action) {
         sendJSONMessage({
           type: "action",
-          action: action,
-          amount: betAmount.value,
+          data: {
+            action: action,
+            amount: betAmount.value,
+          },
         });
         betAmount.value = "";
       }
