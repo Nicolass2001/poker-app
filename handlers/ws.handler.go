@@ -31,6 +31,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	room.Mu.Unlock()
 
 	room.broadcastGameState()
+	room.broadcastPersonalInfoToPlayers()
 
 	for {
 		_, msg, err := conn.ReadMessage()
@@ -53,4 +54,10 @@ func (r *Room) broadcast(msg any) {
 	for _, c := range r.Connections {
 		c.WriteJSON(msg)
 	}
+}
+
+func (r *Room) sendPlayerInfo(nickname string, msg any) {
+	r.Mu.Lock()
+	defer r.Mu.Unlock()
+	r.Connections[nickname].WriteJSON(msg)
 }

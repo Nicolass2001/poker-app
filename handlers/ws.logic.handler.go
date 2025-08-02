@@ -13,20 +13,54 @@ type message struct {
 }
 
 type gameStateData struct {
-	Players []poker.PlayerInfo `json:"players"`
+	GameState      string             `json:"gameState"`
+	Players        []poker.PlayerInfo `json:"players"`
+	CommunityCards []poker.Card       `json:"communityCards"`
+}
+
+type playerInfo struct {
+	Player poker.Player `json:"player"`
 }
 
 func (r *Room) broadcastGameState() {
 	r.Mu.Lock()
+	gameState := r.Game.GetGameState()
 	players := r.Game.GetPlayersInfo()
+	communityCards := r.Game.GetCommunityCards()
 	r.Mu.Unlock()
 
 	r.broadcast(message{
 		Type: "gameState",
 		Data: gameStateData{
-			Players: players,
+			GameState:      gameState,
+			Players:        players,
+			CommunityCards: communityCards,
 		},
 	})
+}
+
+func (r *Room) broadcastPersonalInfoToPlayers() {
+	messages := make(map[string]message)
+
+	r.Mu.Lock()
+	for nick := range r.Connections {
+		player, err := r.Game.GetPlayerById(nick)
+		if err != nil {
+			log.Println("")
+			return
+		}
+		messages[nick] = message{
+			Type: "playerInfo",
+			Data: playerInfo{
+				Player: player,
+			},
+		}
+	}
+	r.Mu.Unlock()
+
+	for nick, msg := range messages {
+		r.sendPlayerInfo(nick, msg)
+	}
 }
 
 func (r *Room) handleIncomingMessage(nickname string, msg []byte) {
@@ -40,7 +74,11 @@ func (r *Room) handleIncomingMessage(nickname string, msg []byte) {
 	case "action":
 		// TODO: Handle actions like call, raise, fold, etc.
 	case "startGame":
-		r.Game.StartGame()
+		err := r.Game.StartGame()
+		if err != nil {
+			log.Println("Error starting game:", err)
+			return
+		}
 	default:
 		log.Println("Unknown message type:", m.Type)
 	}
