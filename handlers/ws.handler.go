@@ -3,7 +3,6 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -29,7 +28,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 	room.Mu.Lock()
 	room.Connections[nickname] = conn
-	room.PlayersNames = append(room.PlayersNames, nickname)
 	room.Mu.Unlock()
 
 	room.broadcastGameState()
@@ -49,19 +47,26 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	conn.Close()
 }
 
-func (r *Room) broadcast(msg []byte) {
+func (r *Room) broadcast(msg any) {
 	r.Mu.Lock()
 	defer r.Mu.Unlock()
 	for _, c := range r.Connections {
-		c.WriteMessage(websocket.TextMessage, msg)
+		c.WriteJSON(msg)
 	}
+}
+
+type message struct {
+	Type string `json:"type"`
+	Data any    `json:"data"`
 }
 
 func (r *Room) broadcastGameState() {
 	r.Mu.Lock()
-	playersNames := make([]string, len(r.PlayersNames))
-	copy(playersNames, r.PlayersNames)
+	players := r.Game.GetPlayersInfo()
 	r.Mu.Unlock()
 
-	r.broadcast([]byte("Current players: " + strings.Join(playersNames, ", ")))
+	r.broadcast(message{
+		Type: "gameState",
+		Data: players,
+	})
 }

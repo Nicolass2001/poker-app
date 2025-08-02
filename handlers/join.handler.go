@@ -1,6 +1,10 @@
 package handlers
 
-import "net/http"
+import (
+	"net/http"
+
+	"poker-app/poker"
+)
 
 func JoinHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
@@ -20,6 +24,16 @@ func JoinHandler(w http.ResponseWriter, r *http.Request) {
 	room.Mu.Unlock()
 	if exists {
 		http.Error(w, "Nickname already taken", http.StatusConflict)
+		return
+	}
+
+	player := poker.NewPlayer(nickname, nickname, room.StartingChips)
+
+	room.Mu.Lock()
+	err := room.Game.AddPlayer(player)
+	room.Mu.Unlock()
+	if err != nil {
+		http.Error(w, "Error adding player: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 

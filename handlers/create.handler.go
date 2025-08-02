@@ -31,14 +31,26 @@ func CreateHandler(w http.ResponseWriter, r *http.Request) {
 
 	game := poker.NewGame(smallBlind, bigBlind)
 
-	roomsMu.Lock()
-	rooms[code] = &Room{
+	room := &Room{
 		Code:          code,
 		Game:          game,
 		StartingChips: startingChips,
 		Connections:   make(map[string]*websocket.Conn),
 	}
+
+	roomsMu.Lock()
+	rooms[code] = room
 	roomsMu.Unlock()
+
+	player := poker.NewPlayer(nickname, nickname, room.StartingChips)
+
+	room.Mu.Lock()
+	err = room.Game.AddPlayer(player)
+	room.Mu.Unlock()
+	if err != nil {
+		http.Error(w, "Error adding player: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	http.Redirect(w, r, "/room/"+code+"?nickname="+nickname, http.StatusSeeOther)
 }
