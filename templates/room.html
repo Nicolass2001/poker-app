@@ -8,6 +8,11 @@
   </head>
   <body>
     <div class="table">
+      <div>
+        <span class="status">Waiting for players...</span>
+        <button id="game-start">Start Game</button>
+      </div>
+      <!-- 
       <div class="pot">Pot: $1200</div>
 
       <div class="community-cards">
@@ -16,7 +21,8 @@
         <div class="card">J♠</div>
         <div class="card">J♠</div>
         <div class="card">J♠</div>
-      </div>
+      </div> 
+      -->
 
       <div class="players">
         <div id="player1" class="player player-top">Player 1</div>
@@ -58,11 +64,6 @@
           "/ws/{{.Code}}?nickname=" +
           encodeURIComponent(nickname)
       );
-      const callButton = document.getElementById("call-button");
-      const checkButton = document.getElementById("check-button");
-      const foldButton = document.getElementById("fold-button");
-      const raiseButton = document.getElementById("raise-button");
-      const betAmount = document.getElementById("bet-amount");
 
       ws.onmessage = (e) => {
         console.log(e.data);
@@ -74,18 +75,38 @@
         }
       };
 
+      function loadPlayers(players) {
+        for (let i = 0; i < 6; i++) {
+          const playerDiv = document.getElementById(`player${i + 1}`);
+          if (i < players.length) {
+            playerDiv.textContent = `${players[i].Name} ($${players[i].Stack})`;
+          } else {
+            playerDiv.textContent = "";
+          }
+        }
+      }
+
+      // Game start button
+      const gameStartButton = document.getElementById("game-start");
+      gameStartButton.onclick = () => {
+        ws.send(JSON.stringify({ type: "startGame" }));
+      };
+
+      // Action buttons
+      const callButton = document.getElementById("call-button");
       callButton.onclick = () => {
         sendAction("call");
       };
-
+      const checkButton = document.getElementById("check-button");
       checkButton.onclick = () => {
         sendAction("check");
       };
-
+      const foldButton = document.getElementById("fold-button");
       foldButton.onclick = () => {
         sendAction("fold");
       };
-
+      const raiseButton = document.getElementById("raise-button");
+      const betAmount = document.getElementById("bet-amount");
       raiseButton.onclick = () => {
         const amount = betAmount.value;
         if (amount) {
@@ -96,19 +117,16 @@
       };
 
       function sendAction(action) {
-        ws.send(JSON.stringify({ action: action, amount: betAmount.value }));
+        sendJSONMessage({
+          type: "action",
+          action: action,
+          amount: betAmount.value,
+        });
         betAmount.value = "";
       }
 
-      function loadPlayers(players) {
-        for (let i = 0; i < 6; i++) {
-          const playerDiv = document.getElementById(`player${i + 1}`);
-          if (i < players.length) {
-            playerDiv.textContent = `${players[i].Name} ($${players[i].Stack})`;
-          } else {
-            playerDiv.textContent = "";
-          }
-        }
+      function sendJSONMessage(message) {
+        ws.send(JSON.stringify(message));
       }
     </script>
   </body>

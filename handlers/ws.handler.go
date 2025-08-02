@@ -34,11 +34,11 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		_, msg, err := conn.ReadMessage()
+		println("Received message:", string(msg))
 		if err != nil {
 			break
 		}
-
-		room.broadcast(msg)
+		room.handleIncomingMessage(nickname, msg)
 	}
 
 	room.Mu.Lock()
@@ -53,20 +53,4 @@ func (r *Room) broadcast(msg any) {
 	for _, c := range r.Connections {
 		c.WriteJSON(msg)
 	}
-}
-
-type message struct {
-	Type string `json:"type"`
-	Data any    `json:"data"`
-}
-
-func (r *Room) broadcastGameState() {
-	r.Mu.Lock()
-	players := r.Game.GetPlayersInfo()
-	r.Mu.Unlock()
-
-	r.broadcast(message{
-		Type: "gameState",
-		Data: players,
-	})
 }
