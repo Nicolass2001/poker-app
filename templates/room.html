@@ -18,12 +18,14 @@
         <div class="card">J♠</div>
       </div>
 
-      <div id="player1" class="player player-top">Player 1</div>
-      <div id="player2" class="player player-right-top">Player 2</div>
-      <div id="player3" class="player player-right-bottom">Player 3</div>
-      <div id="player4" class="player player-bottom">Player 4</div>
-      <div id="player5" class="player player-left-bottom">Player 5</div>
-      <div id="player6" class="player player-left-top">Player 6</div>
+      <div class="players">
+        <div id="player1" class="player player-top">Player 1</div>
+        <div id="player2" class="player player-right-top">Player 2</div>
+        <div id="player3" class="player player-right-bottom">Player 3</div>
+        <div id="player4" class="player player-bottom">Player 4</div>
+        <div id="player5" class="player player-left-bottom">Player 5</div>
+        <div id="player6" class="player player-left-top">Player 6</div>
+      </div>
     </div>
     <div class="controls">
       <button id="call-button" class="action-button">Call</button>
@@ -63,8 +65,13 @@
       const betAmount = document.getElementById("bet-amount");
 
       ws.onmessage = (e) => {
-        const msg = document.createElement("div");
         console.log(e.data);
+        const data = JSON.parse(e.data);
+        if (data.type === "gameState") {
+          loadPlayers(data.data);
+        } else {
+          console.log("Unknown message type:", data.type);
+        }
       };
 
       callButton.onclick = () => {
@@ -91,6 +98,17 @@
       function sendAction(action) {
         ws.send(JSON.stringify({ action: action, amount: betAmount.value }));
         betAmount.value = "";
+      }
+
+      function loadPlayers(players) {
+        for (let i = 0; i < 6; i++) {
+          const playerDiv = document.getElementById(`player${i + 1}`);
+          if (i < players.length) {
+            playerDiv.textContent = `${players[i].Name} ($${players[i].Stack})`;
+          } else {
+            playerDiv.textContent = "";
+          }
+        }
       }
     </script>
   </body>
