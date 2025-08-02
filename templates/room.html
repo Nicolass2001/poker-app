@@ -83,7 +83,7 @@
         for (let i = 0; i < 6; i++) {
           const playerDiv = document.getElementById(`player${i + 1}`);
           if (i < players.length) {
-            playerDiv.textContent = `${players[i].Name} ($${players[i].Stack})`;
+            playerDiv.textContent = `${players[i].name} ($${players[i].stack})`;
           } else {
             playerDiv.textContent = "";
           }
