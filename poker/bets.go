@@ -50,6 +50,10 @@ func (b *bets) setBlinds() {
 	b.bigBlindPlayerBeted = false
 }
 
+func (b *bets) getBettingPlayer() *player {
+	return b.bettingPlayer
+}
+
 func (b *bets) setNextBettingPlayer() {
 	b.bettingPlayer = b.getNextBettingPlayer(b.bettingPlayer)
 }

@@ -29,7 +29,7 @@ func (p *players) addPlayer(player *Player) error {
 
 func (p *players) getPlayersSliceCopy() []Player {
 	playersCopy := make([]Player, 0, len(p.players))
-	for _, player := range p.players {
+	for _, player := range p.playersSlice {
 		playersCopy = append(playersCopy, player.getPlayerCopy())
 	}
 	return playersCopy
@@ -37,7 +37,7 @@ func (p *players) getPlayersSliceCopy() []Player {
 
 func (p *players) getPlayersInfoSliceCopy() []PlayerInfo {
 	playersCopy := make([]PlayerInfo, 0, len(p.players))
-	for _, player := range p.players {
+	for _, player := range p.playersSlice {
 		playersCopy = append(playersCopy, player.getPlayerInfoCopy())
 	}
 	return playersCopy

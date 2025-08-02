@@ -32,10 +32,19 @@ func (p *player) getPlayerCopy() Player {
 }
 
 func (p *player) getPlayerInfoCopy() PlayerInfo {
+	if p.bet == nil {
+		return PlayerInfo{
+			Id:    p.id,
+			Name:  p.name,
+			Stack: p.stack,
+			Bet:   0,
+		}
+	}
 	return PlayerInfo{
 		Id:    p.id,
 		Name:  p.name,
 		Stack: p.stack,
+		Bet:   p.bet.bet,
 	}
 }
 

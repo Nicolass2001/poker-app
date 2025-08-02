@@ -64,6 +64,16 @@ func (g *Game) GetCommunityCards() []Card {
 	return g.deck.getComunityCardsCopy()
 }
 
+// GetCurrentPlayer returns the PlayerInfo of the player whose turn it is to act
+func (g *Game) GetCurrentPlayer() PlayerInfo {
+	return g.bets.getBettingPlayer().getPlayerInfoCopy()
+}
+
+// GetGameState returns the current game state
+func (g *Game) GetGameState() string {
+	return g.gameState.String()
+}
+
 // MakeAction allows the current player to perform an action (check, call, raise, fold, allin) with a specified amount
 func (g *Game) MakeAction(action Action, amount int) error {
 	if !g.gameState.bettingState() {

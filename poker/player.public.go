@@ -12,6 +12,7 @@ type PlayerInfo struct {
 	Id    string `json:"id"`
 	Name  string `json:"name"`
 	Stack int    `json:"stack"`
+	Bet   int    `json:"bet"`
 }
 
 func NewPlayer(id string, name string, initialStack int) *Player {
