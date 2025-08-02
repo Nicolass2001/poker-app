@@ -68,12 +68,16 @@
       ws.onmessage = (e) => {
         console.log(e.data);
         const data = JSON.parse(e.data);
+        handleIncomingMessage(data);
+      };
+
+      function handleIncomingMessage(data) {
         if (data.type === "gameState") {
           loadPlayers(data.data);
         } else {
           console.log("Unknown message type:", data.type);
         }
-      };
+      }
 
       function loadPlayers(players) {
         for (let i = 0; i < 6; i++) {
@@ -89,7 +93,7 @@
       // Game start button
       const gameStartButton = document.getElementById("game-start");
       gameStartButton.onclick = () => {
-        ws.send(JSON.stringify({ type: "startGame" }));
+        sendJSONMessage({ type: "startGame" });
       };
 
       // Action buttons
