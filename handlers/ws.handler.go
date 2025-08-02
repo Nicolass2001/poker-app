@@ -40,6 +40,8 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		room.handleIncomingMessage(nickname, msg)
+		room.broadcastGameState()
+		room.broadcastPersonalInfoToPlayers()
 	}
 
 	room.Mu.Lock()

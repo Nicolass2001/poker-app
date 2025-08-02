@@ -12,6 +12,16 @@ type message struct {
 	Data any    `json:"data"`
 }
 
+type actionMessage struct {
+	Type string     `json:"type"`
+	Data actionData `json:"data"`
+}
+
+type actionData struct {
+	Action string `json:"action"`
+	Amount int    `json:"amount,omitempty"`
+}
+
 type gameStateData struct {
 	GameState      string             `json:"gameState"`
 	Players        []poker.PlayerInfo `json:"players"`
@@ -65,23 +75,90 @@ func (r *Room) broadcastPersonalInfoToPlayers() {
 
 func (r *Room) handleIncomingMessage(nickname string, msg []byte) {
 	var m message
-	if err := json.Unmarshal(msg, &m); err != nil {
+	err := json.Unmarshal(msg, &m)
+	if err != nil {
 		log.Println("Error unmarshalling message:", err)
 		return
 	}
 
 	switch m.Type {
 	case "action":
-		// TODO: Handle actions like call, raise, fold, etc.
+		var actionMsg actionMessage
+		err := json.Unmarshal(msg, &actionMsg)
+		if err != nil {
+			log.Println("Error unmarshalling action message:", err)
+			return
+		}
+
+		r.Mu.Lock()
+		player := r.Game.GetCurrentPlayer()
+		r.Mu.Unlock()
+		if player.Id != nickname {
+			log.Println("Player", nickname, "is not the current player")
+			return
+		}
+
+		r.handleAction(actionMsg.Data)
+
 	case "startGame":
+		r.Mu.Lock()
 		err := r.Game.StartGame()
+		r.Mu.Unlock()
 		if err != nil {
 			log.Println("Error starting game:", err)
 			return
 		}
+
 	default:
 		log.Println("Unknown message type:", m.Type)
-	}
 
-	r.broadcastGameState()
+	}
+}
+
+func (r *Room) handleAction(actionData actionData) {
+	switch actionData.Action {
+	case "call":
+		r.Mu.Lock()
+		err := r.Game.MakeAction(poker.ActionCall, 0)
+		r.Mu.Unlock()
+		if err != nil {
+			log.Println("Error making call action:", err)
+			return
+		}
+	case "raise":
+		r.Mu.Lock()
+		err := r.Game.MakeAction(poker.ActionRaise, actionData.Amount)
+		r.Mu.Unlock()
+		if err != nil {
+			log.Println("Error making raise action:", err)
+			return
+		}
+	case "fold":
+		r.Mu.Lock()
+		err := r.Game.MakeAction(poker.ActionFold, 0)
+		r.Mu.Unlock()
+		if err != nil {
+			log.Println("Error making fold action:", err)
+			return
+		}
+	case "check":
+		r.Mu.Lock()
+		err := r.Game.MakeAction(poker.ActionCheck, 0)
+		r.Mu.Unlock()
+		if err != nil {
+			log.Println("Error making check action:", err)
+			return
+		}
+	case "allin":
+		r.Mu.Lock()
+		err := r.Game.MakeAction(poker.ActionAllIn, actionData.Amount)
+		r.Mu.Unlock()
+		if err != nil {
+			log.Println("Error making all-in action:", err)
+			return
+		}
+	default:
+		log.Println("Unknown action:", actionData.Action)
+		return
+	}
 }
