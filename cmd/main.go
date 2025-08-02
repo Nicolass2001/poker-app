@@ -48,11 +48,8 @@ func main() {
 	initialStacks := []int{10000, 20000}
 	smallBlindAmount := 100
 	bigBlindAmount := 200
-	game, err := poker.NewGame(smallBlindAmount, bigBlindAmount)
-	if err != nil {
-		fmt.Println("Error creating game:", err)
-		return
-	}
+	game := poker.NewGame(smallBlindAmount, bigBlindAmount)
+
 	for i, playerId := range playerIds {
 		player := poker.NewPlayer(playerId, playerNames[i], initialStacks[i])
 		err := game.AddPlayer(player)
@@ -61,7 +58,7 @@ func main() {
 			return
 		}
 	}
-	err = game.StartGame()
+	err := game.StartGame()
 	if err != nil {
 		fmt.Println("Error starting game:", err)
 		return

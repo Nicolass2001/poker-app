@@ -66,11 +66,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	game, err := poker.NewGame(smallBlind, bigBlind)
-	if err != nil {
-		http.Error(w, "Failed to create game", http.StatusInternalServerError)
-		return
-	}
+	game := poker.NewGame(smallBlind, bigBlind)
 
 	roomsMu.Lock()
 	rooms[code] = &Room{

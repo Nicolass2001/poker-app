@@ -13,7 +13,7 @@ type Game struct {
 }
 
 // NewGame creates a new game instance with the specified small and big blind amounts
-func NewGame(smallBlindAmount int, bigBlindAmount int) (*Game, error) {
+func NewGame(smallBlindAmount int, bigBlindAmount int) *Game {
 	bets := newBets(smallBlindAmount, bigBlindAmount)
 	deck := newDeck()
 	players := newPlayers()
@@ -23,7 +23,7 @@ func NewGame(smallBlindAmount int, bigBlindAmount int) (*Game, error) {
 		bets:      bets,
 		players:   players,
 		gameState: stateWaitingForPlayers,
-	}, nil
+	}
 }
 
 // AddPlayer adds a player to the game
