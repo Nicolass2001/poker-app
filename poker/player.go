@@ -31,6 +31,14 @@ func (p *player) getPlayerCopy() Player {
 	}
 }
 
+func (p *player) getPlayerInfoCopy() PlayerInfo {
+	return PlayerInfo{
+		Id:    p.id,
+		Name:  p.name,
+		Stack: p.stack,
+	}
+}
+
 func (p *player) raiseBet(amount int) error {
 	if p.stack < amount {
 		return errors.New("not enough stack to raise")

@@ -34,3 +34,11 @@ func (p *players) getPlayersSliceCopy() []Player {
 	}
 	return playersCopy
 }
+
+func (p *players) getPlayersInfoSliceCopy() []PlayerInfo {
+	playersCopy := make([]PlayerInfo, 0, len(p.players))
+	for _, player := range p.players {
+		playersCopy = append(playersCopy, player.getPlayerInfoCopy())
+	}
+	return playersCopy
+}

@@ -54,6 +54,11 @@ func (g *Game) GetPlayers() []Player {
 	return g.players.getPlayersSliceCopy()
 }
 
+// GetPlayersInfo returns a slice of PlayerInfo for all players in the game (PlayerInfo: id, name, chips)
+func (g *Game) GetPlayersInfo() []PlayerInfo {
+	return g.players.getPlayersInfoSliceCopy()
+}
+
 // GetComunityCards returns the community cards
 func (g *Game) GetCommunityCards() []Card {
 	return g.deck.getComunityCardsCopy()

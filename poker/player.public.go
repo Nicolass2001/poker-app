@@ -8,6 +8,12 @@ type Player struct {
 	Cards [2]Card
 }
 
+type PlayerInfo struct {
+	Id    string
+	Name  string
+	Stack int
+}
+
 func NewPlayer(id string, name string, initialStack int) *Player {
 	return &Player{
 		Id:    id,
