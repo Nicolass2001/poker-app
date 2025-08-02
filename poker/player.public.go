@@ -1,17 +1,17 @@
 package poker
 
 type Player struct {
-	Id    string
-	Name  string
-	Stack int
-	Bet   int
-	Cards [2]Card
+	Id    string  `json:"id"`
+	Name  string  `json:"name"`
+	Stack int     `json:"stack"`
+	Bet   int     `json:"bet"`
+	Cards [2]Card `json:"cards"`
 }
 
 type PlayerInfo struct {
-	Id    string
-	Name  string
-	Stack int
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Stack int    `json:"stack"`
 }
 
 func NewPlayer(id string, name string, initialStack int) *Player {

@@ -1,8 +1,8 @@
 package poker
 
 type Card struct {
-	Value string
-	Suit  string
+	Value string `json:"value"`
+	Suit  string `json:"suit"`
 }
 
 func (c *Card) String() string {
