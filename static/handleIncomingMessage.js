@@ -10,6 +10,8 @@ export function handleIncomingMessage(msg) {
     document.querySelector(".status").textContent = msg.data.gameState;
   } else if (msg.type === "playerInfo") {
     loadPlayerInfo(msg.data.player);
+  } else if (msg.type === "error") {
+    alert(msg.data);
   } else {
     console.log("Unknown message type:", msg.type);
     return;

@@ -63,3 +63,10 @@ func (r *Room) sendPlayerInfo(nickname string, msg any) {
 	defer r.Mu.Unlock()
 	r.Connections[nickname].WriteJSON(msg)
 }
+
+func (r *Room) sendErrorMessage(nickname string, errMsg string) {
+	r.sendPlayerInfo(nickname, message{
+		Type: "error",
+		Data: errMsg,
+	})
+}

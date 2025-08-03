@@ -98,17 +98,18 @@ func (r *Room) handleIncomingMessage(nickname string, msg []byte) {
 		r.Mu.Unlock()
 		if player.Id != nickname {
 			log.Println("Player", nickname, "is not the current player")
+			r.sendErrorMessage(nickname, "It's not your turn to act")
 			return
 		}
 
-		r.handleAction(actionMsg.Data)
+		r.handleAction(actionMsg.Data, nickname)
 
 	case "startGame":
 		r.Mu.Lock()
 		err := r.Game.StartGame()
 		r.Mu.Unlock()
 		if err != nil {
-			log.Println("Error starting game:", err)
+			r.manageError(nickname, "Error starting game: ", err)
 			return
 		}
 
@@ -118,14 +119,14 @@ func (r *Room) handleIncomingMessage(nickname string, msg []byte) {
 	}
 }
 
-func (r *Room) handleAction(actionData actionData) {
+func (r *Room) handleAction(actionData actionData, nickname string) {
 	switch actionData.Action {
 	case "call":
 		r.Mu.Lock()
 		err := r.Game.MakeAction(poker.ActionCall, 0)
 		r.Mu.Unlock()
 		if err != nil {
-			log.Println("Error making call action:", err)
+			r.manageError(nickname, "Error making call action: ", err)
 			return
 		}
 	case "raise":
@@ -133,7 +134,7 @@ func (r *Room) handleAction(actionData actionData) {
 		err := r.Game.MakeAction(poker.ActionRaise, actionData.Amount)
 		r.Mu.Unlock()
 		if err != nil {
-			log.Println("Error making raise action:", err)
+			r.manageError(nickname, "Error making raise action: ", err)
 			return
 		}
 	case "fold":
@@ -141,7 +142,7 @@ func (r *Room) handleAction(actionData actionData) {
 		err := r.Game.MakeAction(poker.ActionFold, 0)
 		r.Mu.Unlock()
 		if err != nil {
-			log.Println("Error making fold action:", err)
+			r.manageError(nickname, "Error making fold action: ", err)
 			return
 		}
 	case "check":
@@ -149,7 +150,7 @@ func (r *Room) handleAction(actionData actionData) {
 		err := r.Game.MakeAction(poker.ActionCheck, 0)
 		r.Mu.Unlock()
 		if err != nil {
-			log.Println("Error making check action:", err)
+			r.manageError(nickname, "Error making check action: ", err)
 			return
 		}
 	case "allin":
@@ -157,11 +158,16 @@ func (r *Room) handleAction(actionData actionData) {
 		err := r.Game.MakeAction(poker.ActionAllIn, actionData.Amount)
 		r.Mu.Unlock()
 		if err != nil {
-			log.Println("Error making all-in action:", err)
+			r.manageError(nickname, "Error making all-in action: ", err)
 			return
 		}
 	default:
 		log.Println("Unknown action:", actionData.Action)
 		return
 	}
+}
+
+func (r *Room) manageError(nickname string, msg string, err error) {
+	log.Println(msg, err)
+	r.sendErrorMessage(nickname, msg+err.Error())
 }
