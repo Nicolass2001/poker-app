@@ -1,20 +1,19 @@
 export function handleIncomingMessage(msg) {
   if (msg.type === "gameState") {
-    loadPlayers(msg.data.players);
+    loadPlayers(msg.data.players, msg.data.currentPlayer);
     if (msg.data.gameState === "Waiting for Players") {
       document.getElementById("game-start-container").style.display = "block";
       return;
     }
     document.getElementById("game-start-container").style.display = "none";
     loadCommunityCards(msg.data.communityCards);
-  }
-  if (msg.type === "playerInfo") {
+    document.querySelector(".status").textContent = msg.data.gameState;
+  } else if (msg.type === "playerInfo") {
     loadPlayerInfo(msg.data.player);
   } else {
     console.log("Unknown message type:", msg.type);
     return;
   }
-  document.getElementsByClassName(".status").textContent = msg.data.gameState;
 }
 
 function loadCommunityCards(cards) {
@@ -58,13 +57,18 @@ function createCard(card) {
   return cardDiv;
 }
 
-function loadPlayers(players) {
+function loadPlayers(players, currentPlayer) {
   for (let i = 0; i < 6; i++) {
     const playerDiv = document.getElementById(`player${i + 1}`);
     if (i < players.length) {
+      playerDiv.style.display = "block";
+      playerDiv.classList.remove("current-player");
+      playerDiv.classList.add(
+        players[i].id === currentPlayer.id ? "current-player" : "waiting-player"
+      );
       playerDiv.textContent = `${players[i].name} ($${players[i].stack}) Bet: ${players[i].bet}`;
     } else {
-      playerDiv.textContent = "";
+      playerDiv.style.display = "none";
     }
   }
 }

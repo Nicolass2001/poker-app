@@ -65,6 +65,11 @@ body {
   border-radius: 10px;
 }
 
+.current-player {
+  background: rgba(255, 255, 255, 0.5);
+  color: black;
+}
+
 .player-top {
   top: 10px;
   left: 50%;

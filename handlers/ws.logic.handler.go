@@ -26,6 +26,7 @@ type gameStateData struct {
 	GameState      string             `json:"gameState"`
 	Players        []poker.PlayerInfo `json:"players"`
 	CommunityCards []poker.Card       `json:"communityCards"`
+	CurrentPlayer  poker.PlayerInfo   `json:"currentPlayer"`
 }
 
 type playerInfo struct {
@@ -37,6 +38,7 @@ func (r *Room) broadcastGameState() {
 	gameState := r.Game.GetGameState()
 	players := r.Game.GetPlayersInfo()
 	communityCards := r.Game.GetCommunityCards()
+	currentPlayer := r.Game.GetCurrentPlayer()
 	r.Mu.Unlock()
 
 	r.broadcast(message{
@@ -45,6 +47,7 @@ func (r *Room) broadcastGameState() {
 			GameState:      gameState,
 			Players:        players,
 			CommunityCards: communityCards,
+			CurrentPlayer:  currentPlayer,
 		},
 	})
 }

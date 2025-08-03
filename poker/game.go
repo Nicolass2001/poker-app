@@ -71,7 +71,10 @@ func (g *Game) GetCommunityCards() []Card {
 
 // GetCurrentPlayer returns the PlayerInfo of the player whose turn it is to act
 func (g *Game) GetCurrentPlayer() PlayerInfo {
-	return g.bets.getBettingPlayer().getPlayerInfoCopy()
+	if g.gameState.bettingState() {
+		return g.bets.getBettingPlayer().getPlayerInfoCopy()
+	}
+	return PlayerInfo{}
 }
 
 // GetGameState returns the current game state
