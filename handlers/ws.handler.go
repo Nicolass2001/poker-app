@@ -32,6 +32,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 
 	room.broadcastGameState()
 	room.broadcastPersonalInfoToPlayers()
+	room.handleEndOfRound()
 
 	for {
 		_, msg, err := conn.ReadMessage()
@@ -42,6 +43,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		room.handleIncomingMessage(nickname, msg)
 		room.broadcastGameState()
 		room.broadcastPersonalInfoToPlayers()
+		room.handleEndOfRound()
 	}
 
 	room.Mu.Lock()

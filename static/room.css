@@ -39,9 +39,15 @@ body {
   gap: 10px;
 }
 
+.cards {
+  display: flex;
+  gap: 10px;
+  flex-direction: row;
+}
+
 .card {
   width: 80px;
-  height: 70px;
+  height: 50px;
   background: white;
   color: black;
   font-size: 35px;
@@ -67,6 +73,11 @@ body {
 
 .current-player {
   background: rgba(255, 255, 255, 0.5);
+  color: black;
+}
+
+.winner {
+  background: gold;
   color: black;
 }
 

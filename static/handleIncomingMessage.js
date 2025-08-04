@@ -1,21 +1,30 @@
 export function handleIncomingMessage(msg) {
-  if (msg.type === "gameState") {
-    loadPlayers(msg.data.players, msg.data.currentPlayer);
-    if (msg.data.gameState === "Waiting for Players") {
-      document.getElementById("game-start-container").style.display = "block";
+  switch (msg.type) {
+    case "gameState":
+      loadPlayers(msg.data.players, msg.data.currentPlayer);
+      gameStartButton(msg.data.gameState);
+      loadCommunityCards(msg.data.communityCards);
+      document.querySelector(".status").textContent = msg.data.gameState;
       return;
-    }
-    document.getElementById("game-start-container").style.display = "none";
-    loadCommunityCards(msg.data.communityCards);
-    document.querySelector(".status").textContent = msg.data.gameState;
-  } else if (msg.type === "playerInfo") {
-    loadPlayerInfo(msg.data.player);
-  } else if (msg.type === "error") {
-    alert(msg.data);
-  } else {
-    console.log("Unknown message type:", msg.type);
+    case "playerInfo":
+      loadPlayerInfo(msg.data.player);
+      return;
+    case "error":
+      alert(msg.data);
+      return;
+    case "winners":
+      loadWinners(msg.data);
+    default:
+      console.log("Unknown message type:", msg.type);
+  }
+}
+
+function gameStartButton(gameState) {
+  if (gameState === "Waiting for Players") {
+    document.getElementById("game-start-container").style.display = "block";
     return;
   }
+  document.getElementById("game-start-container").style.display = "none";
 }
 
 function loadCommunityCards(cards) {
@@ -64,6 +73,7 @@ function loadPlayers(players, currentPlayer) {
     const playerDiv = document.getElementById(`player${i + 1}`);
     if (i < players.length) {
       playerDiv.style.display = "block";
+      playerDiv.classList.add(players[i].id);
       playerDiv.classList.remove("current-player");
       playerDiv.classList.add(
         players[i].id === currentPlayer.id ? "current-player" : "waiting-player"
@@ -72,5 +82,19 @@ function loadPlayers(players, currentPlayer) {
     } else {
       playerDiv.style.display = "none";
     }
+  }
+}
+
+function loadWinners(winners) {
+  for (const winner of winners) {
+    const winnerDiv = document.querySelector("." + winner.id);
+    winnerDiv.classList.add("winner");
+
+    const winnerCardsDiv = document.createElement("div");
+    winnerCardsDiv.className = "cards";
+    winnerDiv.appendChild(winnerCardsDiv);
+    winner.cards.forEach((card) => {
+      winnerCardsDiv.appendChild(createCard(card));
+    });
   }
 }

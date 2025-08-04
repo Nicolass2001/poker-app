@@ -171,3 +171,19 @@ func (r *Room) manageError(nickname string, msg string, err error) {
 	log.Println(msg, err)
 	r.sendErrorMessage(nickname, msg+err.Error())
 }
+
+func (r *Room) handleEndOfRound() {
+	r.Mu.Lock()
+	gameState := r.Game.GetGameState()
+	r.Mu.Unlock()
+
+	if gameState != poker.StateShowdown {
+		return
+	}
+
+	winners := r.Game.GetWinners()
+	r.broadcast(message{
+		Type: "winners",
+		Data: winners,
+	})
+}

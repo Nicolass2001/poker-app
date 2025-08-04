@@ -5,6 +5,7 @@ import "errors"
 type players struct {
 	players      map[string]*player
 	playersSlice []*player
+	winners      []*player
 }
 
 func newPlayers() players {
@@ -48,4 +49,16 @@ func (p *players) getPlayersInfoSliceCopy() []PlayerInfo {
 		playersCopy = append(playersCopy, player.getPlayerInfoCopy())
 	}
 	return playersCopy
+}
+
+func (p *players) setWinners(winners []*player) {
+	p.winners = winners
+}
+
+func (p *players) getWinnersSliceCopy() []Player {
+	winnersCopy := make([]Player, 0, len(p.winners))
+	for _, winner := range p.winners {
+		winnersCopy = append(winnersCopy, winner.getPlayerCopy())
+	}
+	return winnersCopy
 }

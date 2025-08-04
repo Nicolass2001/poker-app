@@ -102,6 +102,14 @@ func (g *Game) MakeAction(action Action, amount int) error {
 	return nil
 }
 
+// GetWinners returns the winners of the game if the game is in the showdown state
+func (g *Game) GetWinners() []Player {
+	if g.gameState != stateShowdown {
+		return nil
+	}
+	return g.players.getWinnersSliceCopy()
+}
+
 func (g *Game) nextBettingGameState() {
 	g.bets.newBettingRound()
 
@@ -127,5 +135,6 @@ func (g *Game) showdownLogic() {
 	for _, winner := range winners {
 		println(" -", winner.name, "with hand:", winner.cards.bestHand.string())
 	}
+	g.players.setWinners(winners)
 	g.bets.distributeWinnings(winners)
 }
