@@ -15,6 +15,6 @@ func main() {
 	http.HandleFunc("/room/", handlers.RoomHandler)
 	http.HandleFunc("/ws/", handlers.WsHandler)
 
-	log.Println("Server running at http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Server running at http://localhost:7777")
+	log.Fatal(http.ListenAndServe(":7777", nil))
 }
